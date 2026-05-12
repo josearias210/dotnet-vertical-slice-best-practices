@@ -1,155 +1,73 @@
-# Agentic Skills
+# dotnet-vertical-slice-best-practices
 
-This repository publishes a single Agent Skill built around the open `SKILL.md` standard.
+[![skills.sh](https://skills.sh/b/josearias210/dotnet-vertical-slice-best-practices)](https://skills.sh/josearias210/dotnet-vertical-slice-best-practices)
+[![Validate Skills](https://github.com/josearias210/dotnet-vertical-slice-best-practices/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/josearias210/dotnet-vertical-slice-best-practices/actions/workflows/validate-skills.yml)
 
-The published skill is:
+An Agent Skill that teaches your AI coding assistant how to implement and evolve .NET backends
+using vertical slice architecture — with explicit validation, error handling, PostgreSQL persistence,
+and dedicated EF Core migrations.
 
-- `dotnet-vertical-slice-best-practices`
+## What is an Agent Skill?
 
-It intentionally contains **skills only**:
+An Agent Skill is a portable folder of instructions that your AI coding assistant loads on demand.
+It follows the open [Agent Skills](https://agentskills.io/) standard, which means it works across
+all compatible tools: GitHub Copilot, Claude Code, Cursor, Windsurf, Codex, and many more.
 
-- no custom agents;
-- no runtime-specific prompt adapters;
-- no command wrappers.
+When you ask your agent to create a new feature, add an endpoint, or handle a migration, this skill
+activates automatically and guides it through the right patterns for your .NET backend.
 
-The canonical published source in this repository is:
-- `./dotnet-vertical-slice-best-practices/`
+## What does this skill do?
 
-## Structure
+Once installed, your coding assistant will:
 
-```text
-dotnet-vertical-slice-best-practices/
-  SKILL.md
-  references/
-    dotnet-migrations-project.md
-    dotnet-platform-baseline.md
-    dotnet-validation-and-errors.md
-    dotnet-vertical-slice.md
+- Structure each feature as a self-contained vertical slice (command/query + handler + contract + persistence)
+- Apply explicit validation and model expected business errors properly
+- Create and validate EF Core migrations in a dedicated migrations project
+- Preserve stable API contracts and avoid breaking caller behavior
+- Check authorization, ownership, and persistence impact on every backend change
+- Consult a .NET platform baseline before recommending upgrades or modernization
+
+The skill ships four internal reference files that the agent loads on demand:
+
+| Reference | Purpose |
+|---|---|
+| `dotnet-vertical-slice.md` | Slice structure, file responsibilities, contract boundaries |
+| `dotnet-validation-and-errors.md` | Request validation, business errors, HTTP response consistency |
+| `dotnet-migrations-project.md` | Dedicated EF Core migrations project, migration quality checks |
+| `dotnet-platform-baseline.md` | Current stable .NET baseline and upgrade checklist |
+
+## Install
+
+Run this command in any project where you want to use the skill:
+
+```sh
+npx skills add josearias210/dotnet-vertical-slice-best-practices
 ```
 
-## Standard Layout
+The CLI detects which coding agents you have installed and places the skill in the right directory.
+It works without installing anything globally — `npx` handles it.
 
-Agent Skills define each skill as a folder that contains a required `SKILL.md` file plus optional
-`scripts/`, `references/`, or `assets/` directories. This repository follows that structure with a
-single publishable skill folder at the repository root.
+### Supported agents
 
-## Compatible AI Tools
+Works with any [Agent Skills-compatible](https://agentskills.io/clients) tool, including:
 
-This skill is designed for Agent Skills-compatible coding assistants. The standard is open and is
-used across compatible tools such as:
-
+- GitHub Copilot
+- Claude Code
+- Cursor
+- Windsurf
 - OpenAI Codex
-- GitHub Copilot environments that support Agent Skills
-- Claude Code and other compatible clients
+- And [many more](https://skills.sh/josearias210/dotnet-vertical-slice-best-practices)
 
-The skill includes a `compatibility` field so the intended client family is visible in the skill metadata.
+### Non-interactive install (CI or scripted setup)
 
-## Installation
-
-Agent Skills are installed by placing skill folders in a client-discoverable skills directory.
-The repository source can live at the root, while the installer places the skill into the right
-agent-specific skills directory.
-
-For project-level sharing, the common interoperable destination is:
-
-```text
-.agents/skills/
+```sh
+npx skills add josearias210/dotnet-vertical-slice-best-practices --yes
 ```
 
-### Install From `skills.sh`
+## How it works
 
-For a published repository on `skills.sh`, the install pattern for one skill is:
+1. **Discovery** — at startup, your agent reads the skill's `name` and `description` to know when it applies.
+2. **Activation** — when your request touches a .NET backend feature, endpoint, command, query, or migration, the agent loads the full `SKILL.md` instructions into context.
+3. **Execution** — the agent follows the vertical slice workflow and loads only the reference files it needs for your specific change.
 
-```text
-npx skills add https://github.com/<owner>/<repo> --skill dotnet-vertical-slice-best-practices
-```
-
-This is the form that works with the standard interactive installer. If the user does not pass
-`--agent` or `--yes`, the CLI can ask which agent to install into and which installation method to use.
-
-Example:
-
-```text
-npx skills add https://github.com/<owner>/<repo> --skill dotnet-vertical-slice-best-practices
-```
-
-### Install From A Local Clone
-
-1. Open the target repository.
-2. Create the standard skills directory if it does not exist:
-
-```powershell
-New-Item -ItemType Directory -Force .agents\skills | Out-Null
-```
-
-3. Copy the skill folder from this repository into the target repository:
-
-```powershell
-Copy-Item -Recurse "PATH_TO_THIS_REPO\dotnet-vertical-slice-best-practices" ".agents\skills\"
-```
-
-4. Confirm the target repository now contains:
-
-```text
-.agents/skills/
-  dotnet-vertical-slice-best-practices/
-```
-
-PowerShell example:
-
-```powershell
-New-Item -ItemType Directory -Force .agents\skills | Out-Null
-Copy-Item -Recurse "PATH_TO_THIS_REPO\dotnet-vertical-slice-best-practices" ".agents\skills\"
-```
-
-### Verify The Installation
-
-You can validate an individual installed skill with the standard validator:
-
-```text
-skills-ref validate ./path/to/skill
-```
-
-Example:
-
-```text
-skills-ref validate ./.agents/skills/dotnet-vertical-slice-best-practices
-```
-
-This repository also ships a local PowerShell validator for the package itself:
-
-```powershell
-.\scripts\validate-agentic-assets.ps1
-```
-
-### How Compatible AI Tools Discover Them
-
-Once the installer places the folder under the chosen agent's skills directory, Agent Skills-compatible
-clients can discover the available skill from its `SKILL.md` metadata and activate it when the task matches.
-
-The standard does not require a single package-manager command. The portable install model is:
-
-1. place the skill folder in a supported skills directory;
-2. keep the folder name and `SKILL.md` intact;
-3. let the compatible client discover and activate it.
-
-## Included Skill
-
-- `dotnet-vertical-slice-best-practices`
-  - implements and evolves .NET backends using vertical slices, explicit validation and error handling, PostgreSQL persistence, and dedicated EF Core migrations.
-  - includes internal references for `dotnet-migrations-project`, `dotnet-platform-baseline`, `dotnet-validation-and-errors`, and `dotnet-vertical-slice`.
-
-## Validation
-
-- `scripts/validate-agentic-assets.ps1`
-  - validates the single-skill package structure, required metadata, companion reference layout, and the absence of the old multi-skill and adapter layout.
-- `.github/workflows/validate-agentic-assets.yml`
-  - runs the same validation in CI on pushes and pull requests.
-
-## Scope Boundary
-
-- This repository packages one skill only.
-- Consuming repositories remain free to define their own project instructions, local conventions, and runtime-specific tooling outside this package.
-
-The idea is simple: publish the skill as a clean root-level package, let `npx skills add` install it into the
-selected agent's standard directory, and keep the package portable instead of tying it to one assistant runtime.
+Nothing is injected into your codebase. The skill lives in your agent's skills directory and is used only at inference time.
