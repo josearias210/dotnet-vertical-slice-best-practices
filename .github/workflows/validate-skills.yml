@@ -7,9 +7,12 @@ on:
       - main
       - master
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   validate:
-    name: Validate against Agent Skills spec
+    name: Validate Agent Skills spec
     runs-on: ubuntu-latest
 
     steps:
