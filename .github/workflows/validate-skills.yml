@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - master
+    tags:
+      - 'v*'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -29,3 +31,14 @@ jobs:
 
       - name: Validate skill
         run: skills-ref validate ./dotnet-vertical-slice-best-practices
+
+      - name: Check version tag matches SKILL.md
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          SKILL_VERSION=$(grep -oP '(?<=version: ").*(?=")' dotnet-vertical-slice-best-practices/SKILL.md)
+          if [ "$TAG_VERSION" != "$SKILL_VERSION" ]; then
+            echo "Tag version '$TAG_VERSION' does not match SKILL.md version '$SKILL_VERSION'"
+            exit 1
+          fi
+          echo "Version $SKILL_VERSION matches tag $GITHUB_REF_NAME"
