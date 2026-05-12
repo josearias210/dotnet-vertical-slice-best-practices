@@ -1,0 +1,20 @@
+name: Validate Agentic Assets
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  validate:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate agentic assets
+        shell: pwsh
+        run: ./scripts/validate-agentic-assets.ps1
