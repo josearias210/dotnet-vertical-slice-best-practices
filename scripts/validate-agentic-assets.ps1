@@ -44,12 +44,26 @@ $skillNames = @($expectedSkillName)
 
 if (Test-Path -LiteralPath $skillFile) {
     $content = Get-Content -LiteralPath $skillFile -Raw
-    $frontmatterOk = $content -match '(?s)^---\r?\nname:\s*[^\r\n]+\r?\ndescription:\s*[^\r\n]+(?:\r?\n[^\r\n]+)*?\r?\n---'
-    if (-not $frontmatterOk) {
+    $lines = [regex]::Split($content, '\r?\n')
+    $frontmatterLines = @()
+    if ($lines.Count -gt 0 -and $lines[0] -eq '---') {
+        for ($i = 1; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -eq '---') {
+                break
+            }
+            $frontmatterLines += $lines[$i]
+        }
+    }
+
+    $hasName = $frontmatterLines | Where-Object { $_ -match '^name:\s*\S' } | Select-Object -First 1
+    $hasDescription = $frontmatterLines | Where-Object { $_ -match '^description:\s*\S' } | Select-Object -First 1
+    $hasCompatibility = $frontmatterLines | Where-Object { $_ -match '^compatibility:\s*\S' } | Select-Object -First 1
+
+    if (-not $hasName -or -not $hasDescription) {
         $failures.Add("Invalid frontmatter in $skillFile")
     }
 
-    if ($content -notmatch '(?m)^compatibility:\s*[^\r\n]+$') {
+    if (-not $hasCompatibility) {
         $failures.Add("Missing compatibility field in $skillFile")
     }
 
