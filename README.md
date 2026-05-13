@@ -5,7 +5,7 @@
 
 An Agent Skill that teaches your AI coding assistant how to implement and evolve .NET backends
 using vertical slice architecture — with explicit validation, error handling, PostgreSQL persistence,
-and dedicated EF Core migrations.
+dedicated EF Core migrations, and solution-level composition guidance for production-ready backends.
 
 ## What is an Agent Skill?
 
@@ -25,11 +25,15 @@ Once installed, your coding assistant will:
 - Apply CQRS and MediatR slice conventions when creating commands, queries, and handlers
 - Apply explicit validation and model expected business errors properly
 - Create and validate EF Core migrations in a dedicated migrations project
+- Use explicit migration runners when schema application should be decoupled from API startup
+- Create or update `compose.yml` when containerized local startup should run dependencies and migrations together
+- Keep executable hosting (`AppHost`) separate from transport-focused endpoint projects (`Api`)
+- Centralize shared MSBuild and NuGet defaults with `Directory.Build.props` and `Directory.Packages.props`
 - Preserve stable API contracts and avoid breaking caller behavior
 - Check authorization, ownership, and persistence impact on every backend change
 - Consult a .NET platform baseline before recommending upgrades or modernization
 
-The skill ships six internal reference files that the agent loads on demand:
+The skill ships seven internal reference files that the agent loads on demand:
 
 | Reference | Purpose |
 |---|---|
@@ -37,7 +41,8 @@ The skill ships six internal reference files that the agent loads on demand:
 | `dotnet-cqrs-slice.md` | CQRS/MediatR slice structure, handlers, request shapes, command/query boundaries |
 | `dotnet-vertical-slice.md` | Slice structure, file responsibilities, contract boundaries |
 | `dotnet-validation-and-errors.md` | Request validation, business errors, HTTP response consistency |
-| `dotnet-migrations-project.md` | Dedicated EF Core migrations project, migration quality checks |
+| `dotnet-migrations-project.md` | Dedicated EF Core migrations project, executable migrator patterns, Compose ordering, migration quality checks |
+| `dotnet-solution-topology.md` | `AppHost`/`Api` separation, `Directory.Build.props`, `Directory.Packages.props`, container restore shape |
 | `dotnet-platform-baseline.md` | Current stable .NET baseline and upgrade checklist |
 
 ## Install

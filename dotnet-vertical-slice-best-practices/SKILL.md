@@ -1,9 +1,9 @@
 ---
 name: dotnet-vertical-slice-best-practices
-description: Implement and evolve .NET backends using vertical slices, explicit validation and error handling, PostgreSQL persistence, and dedicated EF Core migrations. Use when a coding assistant needs to create or change backend features, endpoints, commands, queries, handlers, contracts, persistence, or modernization-sensitive .NET backend behavior.
+description: Implement and evolve .NET backends using vertical slices, explicit validation and error handling, PostgreSQL persistence, dedicated EF Core migrations, clear AppHost/API composition boundaries, and centralized solution defaults through Directory.Build.props and Directory.Packages.props. Use when a coding assistant needs to create or change backend features, endpoints, commands, queries, handlers, contracts, persistence, migrations, startup composition, or modernization-sensitive .NET backend behavior.
 compatibility: Designed for Agent Skills-compatible coding assistants, including OpenAI Codex, GitHub Copilot-compatible environments, and Claude Code-style clients.
 metadata:
-  version: "1.1.1"
+  version: "1.2.0"
 ---
 
 # .NET Backend Vertical Slice
@@ -23,8 +23,10 @@ error handling, and migrations as part of the same backend change.
 4. Make validation, expected failure paths, authorization, and migrations explicit.
 5. If the task touches Minimal APIs, route groups, HTTP result mapping, or OpenAPI, load the Minimal API reference.
 6. If the task adds or reshapes commands, queries, handlers, or MediatR slices, load the CQRS slice reference.
-7. If modernization or version-sensitive work is involved, load the platform baseline reference before recommending upgrades.
-8. Run the most relevant verification for the touched backend surface.
+7. If the task changes startup composition, project boundaries, container build shape, or shared solution-wide build/package defaults, load the solution topology reference.
+8. If the task introduces a dedicated migrator or containerized local backend startup, create or update `compose.yml` so `docker compose up` can run dependencies and migrations in the correct order.
+9. If modernization or version-sensitive work is involved, load the platform baseline reference before recommending upgrades.
+10. Run the most relevant verification for the touched backend surface.
 
 ## Required checklist
 
@@ -39,6 +41,7 @@ For every meaningful backend change, reason through:
 - authorization and ownership checks;
 - persistence impact;
 - migration impact;
+- host/composition or solution-boundary impact when relevant;
 - caller impact.
 
 ## Reference files
@@ -54,7 +57,9 @@ Load only the references that apply:
 - [dotnet-validation-and-errors.md](references/dotnet-validation-and-errors.md)
   Covers request validation, business validation, expected failure modeling, and HTTP response consistency.
 - [dotnet-migrations-project.md](references/dotnet-migrations-project.md)
-  Covers dedicated EF Core migrations projects, migration quality, and persistence-change checks.
+  Covers dedicated EF Core migrations projects, executable migration runners, Compose orchestration, migration quality, and persistence-change checks.
+- [dotnet-solution-topology.md](references/dotnet-solution-topology.md)
+  Covers `AppHost` versus `Api` responsibilities, `Directory.Build.props`, `Directory.Packages.props`, and container-build expectations.
 - [dotnet-platform-baseline.md](references/dotnet-platform-baseline.md)
   Provides the current stable .NET modernization baseline and upgrade review checklist.
 
