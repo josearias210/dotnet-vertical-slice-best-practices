@@ -21,16 +21,20 @@ activates automatically and guides it through the right patterns for your .NET b
 Once installed, your coding assistant will:
 
 - Structure each feature as a self-contained vertical slice (command/query + handler + contract + persistence)
+- Keep Minimal API endpoints thin, grouped, and consistently mapped to typed HTTP results
+- Apply CQRS and MediatR slice conventions when creating commands, queries, and handlers
 - Apply explicit validation and model expected business errors properly
 - Create and validate EF Core migrations in a dedicated migrations project
 - Preserve stable API contracts and avoid breaking caller behavior
 - Check authorization, ownership, and persistence impact on every backend change
 - Consult a .NET platform baseline before recommending upgrades or modernization
 
-The skill ships four internal reference files that the agent loads on demand:
+The skill ships six internal reference files that the agent loads on demand:
 
 | Reference | Purpose |
 |---|---|
+| `dotnet-minimal-api.md` | Minimal API endpoints, route groups, result mapping, `ProblemDetails`, OpenAPI |
+| `dotnet-cqrs-slice.md` | CQRS/MediatR slice structure, handlers, request shapes, command/query boundaries |
 | `dotnet-vertical-slice.md` | Slice structure, file responsibilities, contract boundaries |
 | `dotnet-validation-and-errors.md` | Request validation, business errors, HTTP response consistency |
 | `dotnet-migrations-project.md` | Dedicated EF Core migrations project, migration quality checks |

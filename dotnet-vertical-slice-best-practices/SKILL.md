@@ -21,8 +21,10 @@ error handling, and migrations as part of the same backend change.
 2. Identify the affected use case, route, request, response, and persistence impact.
 3. Keep transport thin and keep behavior near the slice.
 4. Make validation, expected failure paths, authorization, and migrations explicit.
-5. If modernization or version-sensitive work is involved, load the platform baseline reference before recommending upgrades.
-6. Run the most relevant verification for the touched backend surface.
+5. If the task touches Minimal APIs, route groups, HTTP result mapping, or OpenAPI, load the Minimal API reference.
+6. If the task adds or reshapes commands, queries, handlers, or MediatR slices, load the CQRS slice reference.
+7. If modernization or version-sensitive work is involved, load the platform baseline reference before recommending upgrades.
+8. Run the most relevant verification for the touched backend surface.
 
 ## Required checklist
 
@@ -43,6 +45,10 @@ For every meaningful backend change, reason through:
 
 Load only the references that apply:
 
+- [dotnet-minimal-api.md](references/dotnet-minimal-api.md)
+  Covers Minimal API endpoint structure, route groups, `IEndpoint` registration, result mapping, `ProblemDetails`, and OpenAPI expectations.
+- [dotnet-cqrs-slice.md](references/dotnet-cqrs-slice.md)
+  Covers CQRS/MediatR slice structure, request shapes, handler rules, and query/command boundaries.
 - [dotnet-vertical-slice.md](references/dotnet-vertical-slice.md)
   Explains slice structure, file responsibilities, contract boundaries, and version-discipline expectations.
 - [dotnet-validation-and-errors.md](references/dotnet-validation-and-errors.md)
