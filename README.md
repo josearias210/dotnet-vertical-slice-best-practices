@@ -29,11 +29,12 @@ Once installed, your coding assistant will:
 - Create or update `compose.yml` when containerized local startup should run dependencies and migrations together
 - Keep executable hosting (`AppHost`) separate from transport-focused endpoint projects (`Api`)
 - Centralize shared MSBuild and NuGet defaults with `Directory.Build.props` and `Directory.Packages.props`
+- Keep deployable GitHub Actions image builds on merges to `main`, emitting matched backend and migrator image versions
 - Preserve stable API contracts and avoid breaking caller behavior
 - Check authorization, ownership, and persistence impact on every backend change
 - Consult a .NET platform baseline before recommending upgrades or modernization
 
-The skill ships seven internal reference files that the agent loads on demand:
+The skill ships eight internal reference files that the agent loads on demand:
 
 | Reference | Purpose |
 |---|---|
@@ -44,6 +45,7 @@ The skill ships seven internal reference files that the agent loads on demand:
 | `dotnet-migrations-project.md` | Dedicated EF Core migrations project, executable migrator patterns, Compose ordering, migration quality checks |
 | `dotnet-solution-topology.md` | `AppHost`/`Api` separation, `Directory.Build.props`, `Directory.Packages.props`, container restore shape |
 | `dotnet-platform-baseline.md` | Current stable .NET baseline and upgrade checklist |
+| `devops-github.md` | GitHub Actions main-branch build policy, backend/migrator image artifacts, shared image-tag versioning |
 
 ## Install
 

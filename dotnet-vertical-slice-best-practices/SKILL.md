@@ -1,14 +1,14 @@
 ---
 name: dotnet-vertical-slice-best-practices
-description: Implement and evolve .NET backends using vertical slices, explicit validation and error handling, PostgreSQL persistence, dedicated EF Core migrations, clear AppHost/API composition boundaries, and centralized solution defaults through Directory.Build.props and Directory.Packages.props. Use when a coding assistant needs to create or change backend features, endpoints, commands, queries, handlers, contracts, persistence, migrations, startup composition, or modernization-sensitive .NET backend behavior.
+description: Implement and evolve .NET backends using vertical slices, explicit validation and error handling, PostgreSQL persistence, dedicated EF Core migrations, clear AppHost/API composition boundaries, centralized solution defaults through Directory.Build.props and Directory.Packages.props, and GitHub Actions build/versioning practices for backend and migrator images. Use when a coding assistant needs to create or change backend features, endpoints, commands, queries, handlers, contracts, persistence, migrations, startup composition, GitHub CI artifacts, or modernization-sensitive .NET backend behavior.
 compatibility: Designed for Agent Skills-compatible coding assistants, including OpenAI Codex, GitHub Copilot-compatible environments, and Claude Code-style clients.
 metadata:
-  version: "1.2.0"
+  version: "1.4.0"
 ---
 
 # .NET Backend Vertical Slice
 
-Use this skill when backend code needs to be planned, implemented, or refined in a .NET application that follows a vertical-slice style.
+Use this skill when backend code needs to be planned, implemented, devops, databases, or refined in a .NET application that follows a vertical-slice style.
 
 ## Core rule
 
@@ -19,28 +19,44 @@ error handling, and migrations as part of the same backend change.
 
 1. Inspect the repository structure and preserve valid local conventions.
 2. Identify the affected use case, route, request, response, and persistence impact.
-3. Keep transport thin and keep behavior near the slice.
-4. Make validation, expected failure paths, authorization, and migrations explicit.
-5. If the task touches Minimal APIs, route groups, HTTP result mapping, or OpenAPI, load the Minimal API reference.
-6. If the task adds or reshapes commands, queries, handlers, or MediatR slices, load the CQRS slice reference.
-7. If the task changes startup composition, project boundaries, container build shape, or shared solution-wide build/package defaults, load the solution topology reference.
-8. If the task introduces a dedicated migrator or containerized local backend startup, create or update `compose.yml` so `docker compose up` can run dependencies and migrations in the correct order.
-9. If modernization or version-sensitive work is involved, load the platform baseline reference before recommending upgrades.
-10. Run the most relevant verification for the touched backend surface.
+3. Minimize the amount of logic in the transport layer; focus on routing and serialization only, and keep all business logic and validation within the same handler or module associated with the slice.
+4. Address concerns in this priority order:
+   - First: validation rules and expected failure paths.
+   - Second: authorization and ownership checks.
+   - Third: migrations and persistence changes.
+5. Load the references that apply using the decision table below:
+
+   | Task involves…                                                                 | Load this reference              |
+   |--------------------------------------------------------------------------------|----------------------------------|
+   | Minimal APIs, route groups, HTTP result mapping, or OpenAPI                    | dotnet-minimal-api.md            |
+   | Commands, queries, handlers, or MediatR slices                                  | dotnet-cqrs-slice.md             |
+   | Startup composition, project boundaries, or solution-wide build/package defaults | dotnet-solution-topology.md      |
+   | Dedicated migrator or containerized local backend startup                        | dotnet-migrations-project.md; create or update `compose.yml` so `docker compose up` runs dependencies and migrations in order |
+   | GitHub Actions build workflows, release images, or backend/migrator artifact versioning | devops-github.md |
+   | Modernization or version-sensitive upgrades                                     | dotnet-platform-baseline.md (load before recommending upgrades) |
+
+6. Run the most relevant verification for the touched backend surface.
 
 ## Required checklist
 
-For every meaningful backend change, reason through:
+For every meaningful backend change, reason through the following categories in order:
 
+**1. Use Case and Contracts** (start here)
 - slice or feature affected;
 - command or query semantics;
 - endpoint and route behavior;
 - request and response contracts;
+
+**2. Validation and Authorization**
 - validation rules;
 - expected business errors;
 - authorization and ownership checks;
+
+**3. Persistence and Migrations**
 - persistence impact;
 - migration impact;
+
+**4. Composition and Caller Impact**
 - host/composition or solution-boundary impact when relevant;
 - caller impact.
 
@@ -62,6 +78,8 @@ Load only the references that apply:
   Covers `AppHost` versus `Api` responsibilities, `Directory.Build.props`, `Directory.Packages.props`, and container-build expectations.
 - [dotnet-platform-baseline.md](references/dotnet-platform-baseline.md)
   Provides the current stable .NET modernization baseline and upgrade review checklist.
+- [devops-github.md](references/devops-github.md)
+  Covers GitHub Actions build triggers on `main`, backend and migrator image artifacts, and shared image-tag versioning.
 
 ## Output shape
 
