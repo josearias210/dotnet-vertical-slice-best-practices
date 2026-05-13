@@ -3,7 +3,7 @@ name: dotnet-vertical-slice-best-practices
 description: Implement and evolve .NET backends using vertical slices, explicit validation and error handling, PostgreSQL persistence, and dedicated EF Core migrations. Use when a coding assistant needs to create or change backend features, endpoints, commands, queries, handlers, contracts, persistence, or modernization-sensitive .NET backend behavior.
 compatibility: Designed for Agent Skills-compatible coding assistants, including OpenAI Codex, GitHub Copilot-compatible environments, and Claude Code-style clients.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # .NET Backend Vertical Slice
