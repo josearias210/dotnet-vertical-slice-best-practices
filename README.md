@@ -24,11 +24,12 @@ Once installed, your coding assistant will:
 - Keep Minimal API endpoints thin, grouped, and consistently mapped to typed HTTP results
 - Apply CQRS and MediatR slice conventions when creating commands, queries, and handlers
 - Apply explicit validation and model expected business errors properly
-- Create and validate EF Core migrations in a dedicated migrations project
+- Create and validate EF Core migrations in the persistence layer, with a dedicated migrator executable when schema application is externalized
 - Use explicit migration runners when schema application should be decoupled from API startup
 - Create or update `compose.yml` when containerized local startup should run dependencies and migrations together
 - Keep executable hosting (`AppHost`) separate from transport-focused endpoint projects (`Api`)
 - Centralize shared MSBuild and NuGet defaults with `Directory.Build.props` and `Directory.Packages.props`
+- Add and upgrade NuGet dependencies through centralized package management instead of scattered inline versions
 - Keep deployable GitHub Actions image builds on merges to `main`, emitting matched backend and migrator image versions
 - Preserve stable API contracts and avoid breaking caller behavior
 - Check authorization, ownership, and persistence impact on every backend change
@@ -42,7 +43,7 @@ The skill ships eight internal reference files that the agent loads on demand:
 | `dotnet-cqrs-slice.md` | CQRS/MediatR slice structure, handlers, request shapes, command/query boundaries |
 | `dotnet-vertical-slice.md` | Slice structure, file responsibilities, contract boundaries |
 | `dotnet-validation-and-errors.md` | Request validation, business errors, HTTP response consistency |
-| `dotnet-migrations-project.md` | Dedicated EF Core migrations project, executable migrator patterns, Compose ordering, migration quality checks |
+| `dotnet-migrations-project.md` | Infrastructure-owned EF Core migrations, explicit migrator patterns, Compose ordering, entity configuration conventions |
 | `dotnet-solution-topology.md` | `AppHost`/`Api` separation, `Directory.Build.props`, `Directory.Packages.props`, container restore shape |
 | `dotnet-platform-baseline.md` | Current stable .NET baseline and upgrade checklist |
 | `devops-github.md` | GitHub Actions main-branch build policy, backend/migrator image artifacts, shared image-tag versioning |

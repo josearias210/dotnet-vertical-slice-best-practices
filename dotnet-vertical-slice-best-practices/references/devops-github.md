@@ -69,6 +69,13 @@ Review the workflow for these conditions:
 - downstream deployment can consume exactly one version value;
 - the workflow naming makes the distinction between build/publish and deploy clear.
 
+For verification workflows that do not publish release images:
+
+- when a repo enables build-time OpenAPI generation, upload the generated OpenAPI JSON as a CI
+  artifact;
+- verify the generated file path from `dotnet build` output instead of guessing the folder layout;
+- when the repo uses `global.json`, configure `actions/setup-dotnet` with `global-json-file`.
+
 ## Red flags
 
 - publishing release images from pull request events;

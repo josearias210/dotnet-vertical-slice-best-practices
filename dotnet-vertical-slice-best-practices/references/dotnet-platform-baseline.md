@@ -35,3 +35,14 @@ Last reviewed: 2026-05-12
 - Are there documented breaking changes that affect migrations, JSON behavior, validation, routing, OpenAPI, or generated SQL?
 - Does the change require code updates, test updates, deployment updates, or database migration work?
 - Should the work remain on the current supported version instead of upgrading now?
+
+## .NET 10 modernization checks
+
+When intentionally modernizing a backend on .NET 10, consider these current baseline practices:
+
+- pin the SDK with `global.json`;
+- expose liveness/readiness using ASP.NET Core health checks rather than only a hand-written endpoint;
+- generate OpenAPI during build when CI or contract review needs an artifact;
+- centralize `ProblemDetails` metadata such as trace and correlation identifiers;
+- use fluent request validators instead of `DataAnnotations`;
+- verify Minimal API request validation behavior with an invalid HTTP request.

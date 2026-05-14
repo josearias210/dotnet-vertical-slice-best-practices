@@ -84,11 +84,17 @@ Use `Directory.Packages.props` for central package version management:
 
 Do not scatter these values across every `.csproj` when the solution already centralizes them.
 
+Use `global.json` when a repo targets a modern .NET line such as .NET 10 and the build should be
+consistent across local development, CI, and Docker. Prefer copying `global.json` into Docker
+restore layers together with `Directory.Build.props`, `Directory.Packages.props`, and the solution
+file.
+
 ## Container and restore expectations
 
 When Dockerfiles restore individual projects:
 
-1. copy `Directory.Build.props` and `Directory.Packages.props` before `dotnet restore`;
+1. copy `Directory.Build.props`, `Directory.Packages.props`, `global.json` when present, and the
+   solution file before `dotnet restore`;
 2. copy the solution file and relevant `.csproj` files before restore to preserve cache efficiency;
 3. copy source files after restore;
 4. publish the executable project (`AppHost` or `DbMigrator`) explicitly.
@@ -124,6 +130,6 @@ The Compose file should:
 - `Api` owns both endpoint mapping and all startup composition without a clear repo precedent.
 - New projects restate target framework and shared compiler settings inconsistently.
 - Package versions drift across `.csproj` files despite central package management.
-- Dockerfiles restore without copying the central props files first.
+- Dockerfiles restore without copying central props files or `global.json` first.
 - A dedicated migrator exists, but the local Compose workflow does not run it.
 - Migration tooling points at an incidental executable instead of the intentional host.

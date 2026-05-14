@@ -15,14 +15,29 @@ Use this reference whenever backend behavior accepts input, returns failures, or
 
 ### 1. Request validation
 
-Use request validators for:
+Use fluent request validators for:
 
 - required fields;
 - lengths and formats;
 - basic cross-field checks;
 - syntactic correctness.
 
-Keep these rules near the slice.
+Keep these rules near the slice. Prefer a `{UseCase}CommandValidator` or `{UseCase}QueryValidator`
+that expresses rules with a fluent API, similar in spirit to EF Core Fluent API for persistence
+mapping.
+
+Do not use `DataAnnotations` attributes on contracts as the validation strategy. Contracts should
+stay transport/application messages; validation rules should remain explicit and discoverable in
+validator classes.
+
+For .NET 10 Minimal APIs, request-shape validation may happen before the handler through an endpoint
+filter or pipeline behavior that invokes the slice validator. Preserve these boundaries:
+
+- transport validation: required fields, string lengths, simple formats, malformed request shape;
+- application validation: use-case rules, business-safe normalization, expected business errors.
+
+In split `AppHost`/`Api` solutions, keep the validator in `Application` and call it from shared
+validation plumbing instead of duplicating rules in endpoint attributes.
 
 ### 2. Business validation
 
@@ -107,6 +122,8 @@ Plans and implementations should mention:
 - newly introduced error cases;
 - impacted API responses;
 - any frontend consequences from new errors.
+- whether invalid HTTP requests were verified to return `400` and `ProblemDetails` before business
+  work executes.
 
 ## Red flags
 
@@ -114,5 +131,7 @@ Plans and implementations should mention:
 - Returning `500` for expected user mistakes.
 - Returning persistence entities directly and leaking internals.
 - Hiding business invariants in frontend-only logic.
+- Hiding validation rules in `DataAnnotations` attributes when the repo standard is fluent
+  validation.
 - Adding endpoints without describing invalid-path behavior.
 - Returning inconsistent status codes for the same failure class across related endpoints.

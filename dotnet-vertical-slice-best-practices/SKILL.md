@@ -1,9 +1,9 @@
 ---
 name: dotnet-vertical-slice-best-practices
-description: Implement and evolve .NET backends using vertical slices, explicit validation and error handling, PostgreSQL persistence, dedicated EF Core migrations, clear AppHost/API composition boundaries, centralized solution defaults through Directory.Build.props and Directory.Packages.props, and GitHub Actions build/versioning practices for backend and migrator images. Use when a coding assistant needs to create or change backend features, endpoints, commands, queries, handlers, contracts, persistence, migrations, startup composition, GitHub CI artifacts, or modernization-sensitive .NET backend behavior.
+description: Guide for implementing and evolving .NET backends using vertical slices, validation, PostgreSQL persistence, EF Core migrations, AppHost/API composition, and GitHub Actions CI. Use when creating or changing backend features, endpoints, handlers, contracts, persistence, migrations, startup composition, or modernization-sensitive .NET backend behavior. Follow only the steps relevant to the current change.
 compatibility: Designed for Agent Skills-compatible coding assistants, including OpenAI Codex, GitHub Copilot-compatible environments, and Claude Code-style clients.
 metadata:
-  version: "1.4.0"
+  version: "1.4.2"
 ---
 
 # .NET Backend Vertical Slice
@@ -17,10 +17,10 @@ error handling, and migrations as part of the same backend change.
 
 ## Working flow
 
-1. Inspect the repository structure and preserve valid local conventions.
-2. Identify the affected use case, route, request, response, and persistence impact.
-3. Minimize the amount of logic in the transport layer; focus on routing and serialization only, and keep all business logic and validation within the same handler or module associated with the slice.
-4. Address concerns in this priority order:
+1. Inspect the repository structure and preserve valid local conventions (naming patterns, folder structures, and coding standards).
+2. Identify the affected use case, route, request, response, and persistence impact. If multiple slices are affected, ensure consistency across all impacted slices.
+3. Minimize logic in the transport layer (endpoint registration, HTTP result mapping, and request deserialization); keep all business logic and validation within the same handler or module associated with the slice.
+4. Address concerns in this priority order (adjust if a migration or persistence change is a prerequisite for the change):
    - First: validation rules and expected failure paths.
    - Second: authorization and ownership checks.
    - Third: migrations and persistence changes.
@@ -35,7 +35,10 @@ error handling, and migrations as part of the same backend change.
    | GitHub Actions build workflows, release images, or backend/migrator artifact versioning | devops-github.md |
    | Modernization or version-sensitive upgrades                                     | dotnet-platform-baseline.md (load before recommending upgrades) |
 
-6. Run the most relevant verification for the touched backend surface.
+6. For .NET 10 AppHost work, check whether the change should include SDK pinning, real health
+   checks, OpenAPI build artifacts, fluent request validation, or centralized `ProblemDetails`
+   metadata.
+7. Run the most relevant verification for the touched backend surface.
 
 ## Required checklist
 
