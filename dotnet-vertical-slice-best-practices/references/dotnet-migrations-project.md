@@ -6,11 +6,10 @@ Use this reference whenever a backend change affects stored data.
 
 Database schema changes must be represented through EF Core migrations in the dedicated migrations project, not ad hoc SQL sprinkled through the application.
 
-Keep EF Core and provider choices aligned with the repo's target framework. When upgrade work is in
-scope, prefer currently supported stable releases and confirm provider compatibility before changing
-the migrations toolchain.
+Use EF Core 10 with the Npgsql provider, aligned to the skill's .NET 10 baseline. Keep the provider
+and tooling on that line; do not target an older EF Core release.
 
-Load `dotnet-platform-baseline.md` when version or modernization guidance is relevant.
+Load `dotnet-platform-baseline.md` for the fixed baseline.
 
 ## Expected solution convention
 
@@ -20,15 +19,17 @@ Projects may vary by repo, but the standard intent is:
 src/
   App.Api/
   App.Infrastructure/
-  App.Persistence/
   App.Migrations/
 ```
 
-The exact names can differ. Preserve the repo's local names while keeping the same separation of concerns.
+The exact names can differ. Preserve the repo's local names while keeping the same separation of
+concerns. This skill keeps the `DbContext` in `Infrastructure` (see `dotnet-solution-topology.md`);
+if a repo already uses a separate `Persistence` project, follow that local convention instead, but
+do not introduce a second persistence project where one layer already owns the `DbContext`.
 
 ## Responsibilities
 
-- Main persistence project:
+- Infrastructure (persistence-owning project):
   - owns `DbContext`;
   - owns entity configurations;
   - owns provider setup and persistence abstractions.
@@ -98,6 +99,25 @@ Production-facing APIs should not silently become the default schema-mutation me
 development intentionally enables auto-migration on app startup, keep that environment-scoped and
 documented as a convenience, not as the deployment strategy.
 
+## Migration bundles
+
+A dedicated migrator console app is not the only supported option. EF Core migration bundles are a
+first-class, Microsoft-recommended way to ship migrations as a self-contained executable:
+
+```bash
+dotnet ef migrations bundle \
+  --project <MigrationsProject> \
+  --startup-project <StartupProject> \
+  --context <DbContextName> \
+  --self-contained -o efbundle
+```
+
+The resulting `efbundle` runs the same `Migrate` path without requiring the .NET SDK or project
+sources on the target host, which suits CI/CD pipelines and minimal runtime images. Choose
+deliberately between a dedicated migrator service and a bundle (a repo may use both: a bundle in the
+deploy pipeline and a one-shot migrator service in local Compose). Whatever the choice, schema
+application stays explicit and decoupled from request serving.
+
 ## Docker Compose orchestration
 
 When the backend uses Docker Compose for local infrastructure, create or update `compose.yml` with a
@@ -153,6 +173,9 @@ Adapt names and paths to the repository, but preserve the intent:
 - Watch nullability transitions and backfills.
 - Avoid destructive data loss unless the requirement explicitly allows it.
 - Treat enum and storage changes as migration-sensitive.
+- For entities updated by concurrent commands, add an optimistic concurrency token deliberately. With
+  Npgsql, mapping the `xmin` system column as a concurrency token avoids an extra schema column while
+  still protecting against lost updates.
 - Review generated migration code and snapshots instead of trusting scaffolding blindly.
 - Prefer reversible operations when practical; if reversal is not realistic, say so explicitly.
 - Separate schema evolution from large operational backfills when the repo's deployment model requires it.
@@ -175,4 +198,4 @@ Any plan or implementation touching persistence must state:
 - Direct SQL used where a normal EF migration should exist.
 - No thought given to existing data after tightening nullability or uniqueness.
 - Docker Compose starts the API before the database is healthy or before the migrator has completed.
-- Upgrading EF Core or providers without checking support alignment for the repo's target framework.
+- Drifting EF Core or the Npgsql provider off the .NET 10 / EF Core 10 baseline.

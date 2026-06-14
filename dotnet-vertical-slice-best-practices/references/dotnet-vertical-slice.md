@@ -103,11 +103,12 @@ Authorization and ownership checks belong in the use case flow. Do not rely on f
 
 ## Version discipline
 
-- Stay on the repo's current supported runtime unless the request includes modernization work.
-- When modernization is in scope, prefer supported stable releases and current LTS choices over previews.
-- Verify current Microsoft support status for .NET, ASP.NET Core, C#, and EF Core instead of relying on memory.
-- Call out runtime or package upgrades when a new slice would otherwise depend on unsupported or obsolete framework choices.
-- Load `dotnet-platform-baseline.md` when platform version guidance is relevant.
+- Author every slice against .NET 10 / C# 14; this is the skill's fixed baseline.
+- Use current .NET 10 / C# 14 idioms (file-scoped namespaces, primary constructors, no underscore
+  field prefixes) rather than older-style code.
+- If the consuming repo is not yet on .NET 10, the correct move is to bring it to .NET 10, not to
+  author slices against an older runtime.
+- Load `dotnet-platform-baseline.md` for the exact baseline and current-idiom rules.
 
 ## When to split a slice
 

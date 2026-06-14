@@ -1,19 +1,29 @@
 ---
 name: dotnet-vertical-slice-best-practices
-description: Guide for implementing and evolving .NET backends using vertical slices, validation, PostgreSQL persistence, EF Core migrations, AppHost/API composition, and GitHub Actions CI. Use when creating or changing backend features, endpoints, handlers, contracts, persistence, migrations, startup composition, or modernization-sensitive .NET backend behavior. Follow only the steps relevant to the current change.
+description: Guide for implementing and evolving .NET 10 / C# 14 backends using vertical slices, a source-generated mediator and pipeline, fluent validation, PostgreSQL persistence, EF Core 10 migrations, host/API composition, and GitHub Actions CI. Use when creating or changing backend features, endpoints, handlers, contracts, persistence, migrations, startup composition, or .NET 10 backend behavior. Follow only the steps relevant to the current change.
 compatibility: Designed for Agent Skills-compatible coding assistants, including OpenAI Codex, GitHub Copilot-compatible environments, and Claude Code-style clients.
 metadata:
-  version: "1.4.2"
+  version: "1.8.0"
 ---
 
-# .NET Backend Vertical Slice
+# .NET 10 Backend Vertical Slice
 
-Use this skill when backend code needs to be planned, implemented, devops, databases, or refined in a .NET application that follows a vertical-slice style.
+Use this skill when backend code needs to be planned, implemented, deployed, persisted, or refined in a .NET 10 / C# 14 application that follows a vertical-slice style.
 
 ## Core rule
 
 Keep behavior local to the use case, preserve stable API contracts, and treat persistence, validation,
 error handling, and migrations as part of the same backend change.
+
+This skill targets **.NET 10 / C# 14 exclusively** and dispatches use cases through the free
+**source-generated `Mediator` package** (never MediatR; a first-party abstraction is the
+zero-dependency fallback). Use current language idioms — file-scoped namespaces, primary
+constructors, no underscore-prefixed fields — and do not reference or target other .NET versions.
+See `dotnet-platform-baseline.md`.
+
+**Tests are opt-in.** Do not create or scaffold tests unless the user explicitly asks for them. The
+default is to implement the change without tests; only load `dotnet-testing.md` and write tests when
+testing is requested.
 
 ## Working flow
 
@@ -29,11 +39,14 @@ error handling, and migrations as part of the same backend change.
    | Task involves…                                                                 | Load this reference              |
    |--------------------------------------------------------------------------------|----------------------------------|
    | Minimal APIs, route groups, HTTP result mapping, or OpenAPI                    | dotnet-minimal-api.md            |
-   | Commands, queries, handlers, or MediatR slices                                  | dotnet-cqrs-slice.md             |
+   | Commands, queries, handlers, or mediator-dispatched slices                      | dotnet-cqrs-slice.md             |
+   | A complete worked slice / end-to-end example on this stack                       | dotnet-slice-example.md          |
+   | Authentication, authorization, ownership, current-user identity, or secrets      | dotnet-security.md               |
    | Startup composition, project boundaries, or solution-wide build/package defaults | dotnet-solution-topology.md      |
    | Dedicated migrator or containerized local backend startup                        | dotnet-migrations-project.md; create or update `compose.yml` so `docker compose up` runs dependencies and migrations in order |
    | GitHub Actions build workflows, release images, or backend/migrator artifact versioning | devops-github.md |
-   | Modernization or version-sensitive upgrades                                     | dotnet-platform-baseline.md (load before recommending upgrades) |
+   | .NET 10 baseline, current C# 14 idioms, or dependency licensing                 | dotnet-platform-baseline.md |
+   | Unit or integration tests for a slice, `WebApplicationFactory`, or Testcontainers | dotnet-testing.md |
 
 6. For .NET 10 AppHost work, check whether the change should include SDK pinning, real health
    checks, OpenAPI build artifacts, fluent request validation, or centralized `ProblemDetails`
@@ -70,7 +83,11 @@ Load only the references that apply:
 - [dotnet-minimal-api.md](references/dotnet-minimal-api.md)
   Covers Minimal API endpoint structure, route groups, `IEndpoint` registration, result mapping, `ProblemDetails`, and OpenAPI expectations.
 - [dotnet-cqrs-slice.md](references/dotnet-cqrs-slice.md)
-  Covers CQRS/MediatR slice structure, request shapes, handler rules, and query/command boundaries.
+  Covers CQRS slice structure, the source-generated `Mediator` (`ISender`) and pipeline-behavior scheme, request shapes, handler rules, and query/command boundaries.
+- [dotnet-slice-example.md](references/dotnet-slice-example.md)
+  A complete end-to-end worked slice (entity, command, validator, handler, behavior, EF config, endpoint, migration) on this skill's stack.
+- [dotnet-security.md](references/dotnet-security.md)
+  Covers authentication, authorization, ownership checks, the `ICurrentUser` pattern, secrets, and transport hardening.
 - [dotnet-vertical-slice.md](references/dotnet-vertical-slice.md)
   Explains slice structure, file responsibilities, contract boundaries, and version-discipline expectations.
 - [dotnet-validation-and-errors.md](references/dotnet-validation-and-errors.md)
@@ -80,9 +97,11 @@ Load only the references that apply:
 - [dotnet-solution-topology.md](references/dotnet-solution-topology.md)
   Covers `AppHost` versus `Api` responsibilities, `Directory.Build.props`, `Directory.Packages.props`, and container-build expectations.
 - [dotnet-platform-baseline.md](references/dotnet-platform-baseline.md)
-  Provides the current stable .NET modernization baseline and upgrade review checklist.
+  Fixes the .NET 10 / C# 14 baseline, the current-idiom rules, the .NET 10 baseline checks, and dependency-licensing constraints.
 - [devops-github.md](references/devops-github.md)
   Covers GitHub Actions build triggers on `main`, backend and migrator image artifacts, and shared image-tag versioning.
+- [dotnet-testing.md](references/dotnet-testing.md)
+  Covers unit versus integration test layering, `WebApplicationFactory`, Testcontainers for PostgreSQL, and the slice test checklist.
 
 ## Output shape
 

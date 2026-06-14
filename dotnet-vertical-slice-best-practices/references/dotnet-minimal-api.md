@@ -39,10 +39,35 @@ public sealed class CustomersEndpoints : IEndpoint
 }
 ```
 
+## Typed results and OpenAPI metadata
+
+Prefer `TypedResults` over `Results` factory methods, and declare the endpoint's outcomes with a
+`Results<...>` union return type. This is the idiomatic .NET 10 Minimal API style: the union feeds the
+generated OpenAPI document accurate status codes automatically, so you avoid hand-maintained
+`Produces<>()` / `ProducesProblem()` metadata that drifts from reality.
+
+```csharp
+group.MapPost("/", async Task<Results<Created<CustomerResponse>, ValidationProblem, Conflict<ProblemDetails>>> (
+    ISender sender,
+    CreateCustomerCommand command,
+    CancellationToken cancellationToken) =>
+{
+    var result = await sender.Send(command, cancellationToken);
+    return result.Match<Results<Created<CustomerResponse>, ValidationProblem, Conflict<ProblemDetails>>>(
+        value => TypedResults.Created($"/api/v1/customers/{value.Id}", value),
+        errors => errors.ToProblemResult()); // shared ErrorOr -> typed result mapper
+});
+```
+
+Keep the union honest: every status code the endpoint can actually return should appear in the type,
+and nothing it cannot return should.
+
 ## HTTP mapping rules
 
 - Map expected application errors consistently to typed HTTP responses.
-- Use shared result-mapping extensions where possible.
+- Use a single shared result-mapping extension (for example an `ErrorOr<T>` -> typed result mapper)
+  rather than re-deriving status codes per endpoint. See `dotnet-validation-and-errors.md` for the
+  reference mapping.
 - Use `ProblemDetails` for error payloads.
 - Include trace and correlation data in problem payloads when the repo supports it; for new
   .NET 10 AppHost work, prefer configuring `AddProblemDetails(options =>
@@ -72,10 +97,14 @@ public sealed class CustomersEndpoints : IEndpoint
 
 ## OpenAPI rules
 
-- Prefer the official Microsoft package: `Microsoft.AspNetCore.OpenApi`.
-- Do not add Swagger or Swashbuckle packages unless the user explicitly requests an exception.
+- Prefer the official Microsoft package: `Microsoft.AspNetCore.OpenApi` to produce the document.
+- Do not add Swagger or Swashbuckle packages unless the user explicitly requests an exception
+  (Swashbuckle was dropped from the .NET web API templates and no longer ships a bundled UI).
+- For an interactive API reference UI, use **Scalar** (`Scalar.AspNetCore`) on top of the official
+  document via `MapScalarApiReference()`, rather than reintroducing Swagger UI.
 - Register OpenAPI centrally in `Program.cs`.
-- Expose the OpenAPI document with `MapOpenApi()` for non-production environments by default.
+- Expose the OpenAPI document with `MapOpenApi()`, and the Scalar UI, for non-production environments
+  by default.
 - For .NET 10 projects that need CI artifacts or contract review, enable build-time OpenAPI
   generation with `OpenApiGenerateDocuments` and `Microsoft.Extensions.ApiDescription.Server`.
 - Verify the actual generated file path in the repo. With current tooling it may be
@@ -92,6 +121,18 @@ public sealed class CustomersEndpoints : IEndpoint
   an EF Core DbContext health check tagged `ready`.
 - It is acceptable to keep `/api/health` as a compatibility alias, but it should use the same
   health-check pipeline.
+
+## Cross-cutting edge concerns
+
+These are first-class in ASP.NET Core and belong at the HTTP edge, not inside handlers:
+
+- Rate limiting: configure `AddRateLimiter` centrally and apply policies per route group with
+  `RequireRateLimiting("policy")` on public or expensive endpoints.
+- Output caching: use `AddOutputCache` and `CacheOutput()` for safe, cacheable reads instead of
+  ad hoc caching inside handlers.
+- API versioning: keep version in the route group (`api/v1/...`) consistently, or adopt
+  `Asp.Versioning` when multiple live versions must coexist. Do not conflate API contract versioning
+  with the runtime/framework version discipline in `dotnet-platform-baseline.md`.
 
 ## Avoid
 

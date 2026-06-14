@@ -1,48 +1,75 @@
 # .NET Platform Baseline
 
-Use this reference when a task needs an explicit .NET support baseline before making a modernization recommendation.
+This skill targets **.NET 10 / C# 14 exclusively**. Treat that as a fixed assumption, not a choice to
+re-evaluate per repo. Do not introduce, recommend, or fall back to any other .NET line. If a repo is
+not yet on .NET 10, modernizing it to .NET 10 is the path; do not author slices against an older
+runtime.
 
 ## Review date
 
-Last reviewed: 2026-05-12
+Last reviewed: 2026-06-13. Re-verify the official .NET 10 support window if this baseline is reused
+long after this date.
 
-## Current stable baseline
+## Fixed baseline
 
-- Preferred modernization target for new platform work: `.NET 10` LTS.
-- Preferred matching web stack: `ASP.NET Core 10`.
-- Preferred matching ORM release when upgrading persisted applications: `EF Core 10`.
-- Current language reference point for `.NET 10`: `C# 14`.
+- Runtime: `.NET 10` (LTS, supported through November 2028).
+- Web stack: `ASP.NET Core 10`.
+- ORM: `EF Core 10` (LTS, aligned to `.NET 10`).
+- Language: `C# 14`.
 
-## Support position
+These move together as one coordinated baseline. SDK, ASP.NET Core, EF Core, the database provider,
+and the language version are upgraded as a set, never as isolated package bumps.
 
-- `.NET 10` is the current LTS line and is supported through November 2028.
-- `.NET 9` remains supported through November 2026.
-- `.NET 8` remains supported through November 2026.
-- `EF Core 10` is an LTS release aligned to `.NET 10` and is supported through November 10, 2028.
+## Always use the current idioms
 
-## Decision rules
+Default to the latest .NET 10 / C# 14 idioms; do not write code in an older style "to be safe":
 
-1. Preserve the consuming repository's current target framework when the task is not about modernization.
-2. Prefer supported stable versions over previews.
-3. Prefer the active LTS line for greenfield work or intentional modernization unless the repository has a concrete constraint.
-4. Treat runtime, ASP.NET Core, EF Core, provider, and language-version upgrades as coordinated work, not isolated package bumps.
-5. Verify official support status again whenever this baseline is reused after its review date has gone stale.
+- file-scoped namespaces (single-line `namespace App.Feature;`), never block-scoped namespaces;
+- primary constructors for handlers, services, and DI-injected types instead of a hand-written
+  constructor plus backing fields;
+- no underscore-prefixed field names (`_repository`); reference the primary-constructor parameter
+  directly, which removes most private backing fields entirely;
+- collection expressions (`[]`), target-typed `new`, pattern matching, and `required` members where
+  they make intent clearer;
+- centralized global usings and `ImplicitUsings`.
 
-## Upgrade review checklist
+See `dotnet-solution-topology.md` for how these are enforced via `.editorconfig`, analyzers, and
+`Directory.Build.props`.
 
-- Does the target repository already support the proposed runtime?
-- Are the SDK, ASP.NET Core dependencies, EF Core packages, database provider, and CI images compatible?
-- Are there documented breaking changes that affect migrations, JSON behavior, validation, routing, OpenAPI, or generated SQL?
-- Does the change require code updates, test updates, deployment updates, or database migration work?
-- Should the work remain on the current supported version instead of upgrading now?
+## .NET 10 baseline checks
 
-## .NET 10 modernization checks
-
-When intentionally modernizing a backend on .NET 10, consider these current baseline practices:
+When building or reviewing a .NET 10 backend, confirm these baseline practices:
 
 - pin the SDK with `global.json`;
 - expose liveness/readiness using ASP.NET Core health checks rather than only a hand-written endpoint;
 - generate OpenAPI during build when CI or contract review needs an artifact;
+- return Minimal API results as `TypedResults` with `Results<...>` union types so the generated
+  OpenAPI document carries accurate status codes without manual `Produces<>()` calls;
 - centralize `ProblemDetails` metadata such as trace and correlation identifiers;
 - use fluent request validators instead of `DataAnnotations`;
-- verify Minimal API request validation behavior with an invalid HTTP request.
+- verify Minimal API request validation behavior with an invalid HTTP request;
+- add OpenTelemetry tracing, metrics, and logs, and prefer source-generated logging
+  (`[LoggerMessage]`) over interpolated log calls on hot paths;
+- enable built-in rate limiting (`AddRateLimiter`) on public endpoints when load shaping matters;
+- model optimistic concurrency for mutating commands (with Npgsql, the `xmin` system column maps
+  cleanly to an EF Core concurrency token);
+- enable connection resiliency for PostgreSQL (`EnableRetryOnFailure`) and consider
+  `AddDbContextPool` for high-throughput services;
+- for outbound HTTP calls, use `IHttpClientFactory` with `Microsoft.Extensions.Http.Resilience`
+  (the Polly v8-based standard resilience handler) rather than hand-rolled retry/timeout code;
+- decide deliberately how migrations reach each environment: a dedicated migrator service, an EF
+  Core migration bundle (`dotnet ef migrations bundle`), or both. Do not let API startup silently
+  become the production schema-mutation path.
+
+## Dependency licensing
+
+Keep the dependency set healthy and license-clean:
+
+- Do not depend on `MediatR`, `AutoMapper`, or `MassTransit`. They moved to commercial licensing
+  (2024–2025) and require a paid license above a revenue threshold. This skill deliberately avoids
+  them; see `dotnet-cqrs-slice.md` for the free source-generated `Mediator` package (with a
+  first-party fallback) used instead.
+- Keep request validation library-neutral ("fluent request validators") so the pattern does not bind
+  the project to a single package's licensing or support trajectory.
+- Before adding any cross-cutting infrastructure library, confirm its license is free for the
+  project's use and prefer a small first-party abstraction when the need is narrow.

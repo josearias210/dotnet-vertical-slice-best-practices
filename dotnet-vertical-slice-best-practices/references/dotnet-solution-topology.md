@@ -7,6 +7,12 @@ builds, or shared MSBuild/NuGet defaults.
 
 Keep the executable composition root separate from the transport layer.
 
+> Naming note: `AppHost` here means the backend's executable composition root (the project that owns
+> `Program.cs` and wires the application together). It is **not** the .NET Aspire orchestrator
+> project, which by convention is also named `*.AppHost`. If a repo uses Aspire, or if the name is
+> likely to confuse contributors, prefer an unambiguous name such as `App.Bootstrap`, `App.Host`, or
+> `App.Web`. See "When .NET Aspire is the better fit" below.
+
 Preserve local naming, but prefer a shape like:
 
 ```text
@@ -84,10 +90,30 @@ Use `Directory.Packages.props` for central package version management:
 
 Do not scatter these values across every `.csproj` when the solution already centralizes them.
 
-Use `global.json` when a repo targets a modern .NET line such as .NET 10 and the build should be
-consistent across local development, CI, and Docker. Prefer copying `global.json` into Docker
-restore layers together with `Directory.Build.props`, `Directory.Packages.props`, and the solution
-file.
+Use `global.json` to pin the .NET 10 SDK so the build is consistent across local development, CI, and
+Docker. Prefer copying `global.json` into Docker restore layers together with `Directory.Build.props`,
+`Directory.Packages.props`, and the solution file.
+
+## Coding conventions (C# 14)
+
+This skill targets .NET 10 / C# 14 (see `dotnet-platform-baseline.md`). Enforce current idioms
+consistently across the solution and prefer enforcement through `.editorconfig` plus analyzers over
+manual review:
+
+- **File-scoped namespaces** everywhere (`namespace App.Feature;`). Do not use block-scoped
+  namespaces.
+- **Primary constructors** for handlers, endpoints, services, and any DI-injected type. Capture
+  dependencies as constructor parameters rather than declaring a constructor plus backing fields.
+- **No underscore-prefixed field names** (`_repository`). With primary constructors the parameter is
+  referenced directly, which removes most private backing fields; where a field is genuinely needed,
+  name it without a leading underscore.
+- Prefer current language features where they clarify intent: collection expressions (`[]`),
+  target-typed `new`, `required` members, and pattern matching.
+- Keep `Nullable` enabled and treat nullability warnings seriously; enable .NET analyzers and prefer
+  `TreatWarningsAsErrors` (or a curated set) so style and correctness rules are enforced at build time.
+- Centralize global usings (`ImplicitUsings` plus a `GlobalUsings.cs` when explicit additions help).
+
+Set these once in `Directory.Build.props` and `.editorconfig` rather than restating them per project.
 
 ## Container and restore expectations
 
@@ -114,6 +140,21 @@ The Compose file should:
 - make the migrator depend on a healthy database;
 - make the API or app host depend on successful migrator completion when both run in Compose;
 - keep the default `docker compose up` path useful for a new contributor.
+
+## When .NET Aspire is the better fit
+
+This skill's default topology composes startup by hand and orchestrates local dependencies with
+`compose.yml`. That is intentional and keeps the stack explicit. .NET Aspire is a valid alternative
+when a repo wants opinionated local orchestration, service discovery, and built-in telemetry across
+multiple services. Reach for Aspire when:
+
+- the system is genuinely multi-service and benefits from a shared orchestration dashboard;
+- the team wants service discovery and standardized OpenTelemetry wiring out of the box;
+- local "F5 runs everything" ergonomics matter more than a minimal dependency surface.
+
+If a repo adopts Aspire, its orchestrator project really is the `*.AppHost`, and that project should
+not be conflated with the per-service composition root described above. Do not mix both meanings of
+`AppHost` in the same solution.
 
 ## Checklist for solution-level changes
 

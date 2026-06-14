@@ -88,6 +88,44 @@ Keep category mapping predictable, for example:
 
 Reuse the repo's current contract if it already differs intentionally.
 
+## Reference mapping (ErrorOr -> typed result)
+
+Centralize the failure-to-HTTP mapping once so endpoints do not re-derive status codes. With
+`ErrorOr<T>`, a shared extension keeps the union return types in `dotnet-minimal-api.md` honest:
+
+```csharp
+public static class ErrorMappingExtensions
+{
+    public static IResult ToProblemResult(this List<Error> errors)
+    {
+        if (errors.All(e => e.Type == ErrorType.Validation))
+        {
+            var failures = errors.ToDictionary(e => e.Code, e => new[] { e.Description });
+            return TypedResults.ValidationProblem(failures);
+        }
+
+        var first = errors[0];
+        var status = first.Type switch
+        {
+            ErrorType.NotFound   => StatusCodes.Status404NotFound,
+            ErrorType.Conflict   => StatusCodes.Status409Conflict,
+            ErrorType.Forbidden  => StatusCodes.Status403Forbidden,
+            ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+            _                    => StatusCodes.Status400BadRequest,
+        };
+
+        return TypedResults.Problem(
+            detail: first.Description,
+            statusCode: status,
+            // a machine-readable code aids callers without leaking internals
+            extensions: new Dictionary<string, object?> { ["code"] = first.Code });
+    }
+}
+```
+
+Adapt the error type and codes to the repo's established result model. The point is one mapper, used
+everywhere, producing `ProblemDetails` consistently — not a per-endpoint reinvention.
+
 ## Slice checklist
 
 For every new or changed slice, ask:
@@ -110,9 +148,10 @@ Do not use shape validation as a substitute for:
 
 ## Version and API discipline
 
-- Prefer the repo's stable, supported validation and error stack.
-- Do not introduce preview packages or framework-only features unless the request explicitly calls for them.
-- When a change depends on runtime or framework capabilities, verify that the target version is supported and stable before baking that assumption into the contract.
+- Target the .NET 10 / C# 14 validation and error stack; this is the skill's fixed baseline.
+- Keep request validation library-neutral (fluent request validators) so the contract is not bound
+  to a single package's licensing or support trajectory.
+- Do not introduce preview packages unless the request explicitly calls for them.
 
 ## Reporting expectations
 
