@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The version recorded here matches `metadata.version` in
 [`SKILL.md`](dotnet-vertical-slice-best-practices/SKILL.md).
 
+## [2.0.0] - 2026-06-14
+
+First public release of the matured, opinionated **.NET 10 / C# 14** baseline. This is a major bump
+because the guidance changed in ways that are intentionally breaking versus the last published line
+(1.4.x): MediatR is no longer recommended, support for other .NET versions was removed, and new
+coding conventions are now required. The `1.5.0`–`1.8.0` entries below are the development increments
+that led here.
+
+### Highlights
+- **.NET 10 / C# 14 only.** No references to other .NET lines; current idioms required (file-scoped
+  namespaces, primary constructors, no underscore-prefixed fields).
+- **No MediatR.** Dispatch uses the free source-generated `Mediator` package (first-party fallback
+  documented), with a pipeline-behavior scheme for cross-cutting integrations.
+- **Coherent, license-clean stack.** ErrorOr + `ProblemDetails`, fluent validation in a behavior,
+  EF Core 10 + Npgsql, `Microsoft.AspNetCore.OpenApi` + Scalar, Http.Resilience, optional
+  Testcontainers/Respawn testing.
+- **Worked end-to-end slice** and a **security reference** (`ICurrentUser`, ownership, secrets,
+  transport hardening).
+- Repository hardening: `LICENSE` (MIT), `CHANGELOG.md`, grouped README, opinionated-stack table.
+
+### Added
+- A **Sources** section in `dotnet-platform-baseline.md` listing the authoritative references behind
+  the perishable facts (support windows, licensing), plus a README "Staying current" note describing
+  how the skill is maintained.
+
 ## [1.8.0] - 2026-06-14
 
 ### Added

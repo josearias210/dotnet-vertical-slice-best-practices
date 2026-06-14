@@ -73,3 +73,26 @@ Keep the dependency set healthy and license-clean:
   the project to a single package's licensing or support trajectory.
 - Before adding any cross-cutting infrastructure library, confirm its license is free for the
   project's use and prefer a small first-party abstraction when the need is narrow.
+
+## Sources (re-verify against these)
+
+The perishable facts in this skill — support windows, language/runtime versions, and dependency
+licensing — must be re-verified against their authoritative sources, not memory, when the review date
+above goes stale. Update this file (and the `Last reviewed` date) when any of these change.
+
+- .NET support policy and lifecycle: <https://dotnet.microsoft.com/platform/support/policy/dotnet-core>
+- .NET release notes and dates: <https://github.com/dotnet/core/blob/main/releases.md>
+- EF Core releases and lifecycle: <https://learn.microsoft.com/ef/core/what-is-new/>
+- ASP.NET Core OpenAPI: <https://learn.microsoft.com/aspnet/core/fundamentals/openapi/>
+- HTTP resilience (`Microsoft.Extensions.Http.Resilience`): <https://learn.microsoft.com/dotnet/core/resilience/http-resilience>
+- Npgsql EF Core provider: <https://www.npgsql.org/efcore/>
+- Source-generated mediator (`Mediator`): <https://github.com/martinothamar/Mediator>
+- `ErrorOr`: <https://github.com/amantinband/error-or>
+- FluentValidation: <https://docs.fluentvalidation.net/>
+- Scalar API reference UI: <https://github.com/scalar/scalar>
+- Testcontainers for .NET: <https://dotnet.testcontainers.org/>
+- Respawn: <https://github.com/jbogard/Respawn>
+- Agent Skills standard: <https://agentskills.io/>
+
+Treat these as the verification trail behind the skill's opinions; they are not bundled or scraped,
+only consulted when the version-sensitive guidance is reviewed.

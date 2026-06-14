@@ -8,6 +8,25 @@ backends using vertical slice architecture — with a free source-generated medi
 explicit fluent validation, error handling, PostgreSQL persistence, dedicated EF Core 10 migrations,
 and solution-level composition guidance for production-ready backends.
 
+## The opinionated stack
+
+This skill encodes one coherent, current set of choices for a .NET 10 backend. Every dependency is
+free and license-clean; commercially relicensed packages (MediatR, AutoMapper, MassTransit) are
+deliberately avoided.
+
+| Concern | Choice |
+|---|---|
+| Runtime / language | .NET 10 (LTS) / C# 14, current idioms (file-scoped namespaces, primary constructors) |
+| Architecture | Vertical slice + CQRS |
+| Dispatch | Source-generated `Mediator` (martinothamar) — never MediatR |
+| Validation | Fluent validators in a pipeline behavior |
+| Errors | `ErrorOr<T>` → `ProblemDetails`, with typed `Results<>` unions |
+| Persistence | EF Core 10 + PostgreSQL (Npgsql), dedicated migrations project |
+| API docs | `Microsoft.AspNetCore.OpenApi` + Scalar UI (no Swashbuckle) |
+| Composition | Separate host and transport (`Api`) projects, central package management |
+| Resilience | `Microsoft.Extensions.Http.Resilience` (Polly v8) for outbound HTTP |
+| Tests (opt-in) | `WebApplicationFactory` + Testcontainers + Respawn |
+
 ## What is an Agent Skill?
 
 An Agent Skill is a portable folder of instructions that your AI coding assistant loads on demand.
@@ -36,21 +55,38 @@ Once installed, your coding assistant will:
 - Check authorization, ownership, and persistence impact on every backend change
 - Pin everything to the .NET 10 / C# 14 baseline and apply current idioms (file-scoped namespaces, primary constructors, no underscore-prefixed fields)
 
-The skill ships eleven internal reference files that the agent loads on demand:
+The skill ships eleven internal reference files that the agent loads on demand, grouped by concern:
+
+**Feature slices & API edge**
 
 | Reference | Purpose |
 |---|---|
-| `dotnet-minimal-api.md` | Minimal API endpoints, route groups, result mapping, `ProblemDetails`, OpenAPI |
-| `dotnet-cqrs-slice.md` | CQRS slice structure, source-generated `Mediator` (`ISender`) and pipeline behaviors, handlers, request shapes, command/query boundaries |
-| `dotnet-slice-example.md` | Complete end-to-end worked slice: entity, command, validator, handler, behavior, EF config, endpoint, migration |
+| `dotnet-vertical-slice.md` | Slice structure, file responsibilities, contract boundaries, when to split |
+| `dotnet-cqrs-slice.md` | CQRS slice structure, source-generated `Mediator` (`ISender`) and pipeline behaviors, handlers, command/query boundaries |
+| `dotnet-minimal-api.md` | Minimal API endpoints, route groups, typed result mapping, `ProblemDetails`, OpenAPI + Scalar |
+| `dotnet-validation-and-errors.md` | Request validation, business errors, `ErrorOr` → `ProblemDetails` mapping |
 | `dotnet-security.md` | Authentication, authorization, ownership, the `ICurrentUser` pattern, secrets, transport hardening |
-| `dotnet-vertical-slice.md` | Slice structure, file responsibilities, contract boundaries |
-| `dotnet-validation-and-errors.md` | Request validation, business errors, HTTP response consistency |
-| `dotnet-migrations-project.md` | Infrastructure-owned EF Core migrations, explicit migrator patterns, Compose ordering, entity configuration conventions |
-| `dotnet-solution-topology.md` | Host/`Api` separation, C# 14 coding conventions, `Directory.Build.props`, `Directory.Packages.props`, container restore shape |
+| `dotnet-slice-example.md` | Complete end-to-end worked slice: entity, command, validator, handler, behavior, EF config, endpoint, migration |
+
+**Persistence**
+
+| Reference | Purpose |
+|---|---|
+| `dotnet-migrations-project.md` | Infrastructure-owned EF Core migrations, explicit migrator/bundle patterns, Compose ordering, entity configuration |
+
+**Solution & platform**
+
+| Reference | Purpose |
+|---|---|
+| `dotnet-solution-topology.md` | Host/`Api` separation, C# 14 coding conventions, `Directory.Build.props`, `Directory.Packages.props`, container restore |
 | `dotnet-platform-baseline.md` | Fixed .NET 10 / C# 14 baseline, current-idiom rules, baseline checks, dependency licensing |
+
+**DevOps & quality**
+
+| Reference | Purpose |
+|---|---|
 | `devops-github.md` | GitHub Actions main-branch build policy, backend/migrator image artifacts, shared image-tag versioning |
-| `dotnet-testing.md` | Unit vs integration layering, `WebApplicationFactory`, Testcontainers for PostgreSQL, slice test checklist |
+| `dotnet-testing.md` | Unit vs integration layering, `WebApplicationFactory`, Testcontainers, Respawn, slice test checklist (opt-in) |
 
 ## Install
 
@@ -83,7 +119,7 @@ npx skills add josearias210/dotnet-vertical-slice-best-practices --yes
 ## How it works
 
 1. **Discovery** — at startup, your agent reads the skill's `name` and `description` to know when it applies.
-2. **Activation** — when your request touches a .NET backend feature, endpoint, command, query, or migration, the agent loads the full `SKILL.md` instructions into context.
+2. **Activation** — when your request touches a .NET 10 backend feature, endpoint, command, query, or migration, the agent loads the full `SKILL.md` instructions into context.
 3. **Execution** — the agent follows the vertical slice workflow and loads only the reference files it needs for your specific change.
 
 Nothing is injected into your codebase. The skill lives in your agent's skills directory and is used only at inference time.
@@ -93,6 +129,25 @@ Nothing is injected into your codebase. The skill lives in your agent's skills d
 Notable changes are tracked in [CHANGELOG.md](CHANGELOG.md). The version there matches
 `metadata.version` in [`SKILL.md`](dotnet-vertical-slice-best-practices/SKILL.md), and tagged releases
 are verified against it in CI.
+
+## Staying current
+
+The skill is authored guidance, not a scraped feed. The only perishable parts — .NET/EF Core support
+windows, language versions, and dependency licensing — are isolated in
+[`dotnet-platform-baseline.md`](dotnet-vertical-slice-best-practices/references/dotnet-platform-baseline.md),
+which carries a `Last reviewed` date and a list of the authoritative sources to re-verify against.
+When those facts change, that file (and the date) is what gets updated.
+
+## Contributing
+
+Issues and pull requests are welcome — bug reports, clearer wording, or a well-argued change to a
+convention. If you disagree with an opinion the skill takes, open an issue with the reasoning; the
+goal is a coherent, defensible .NET 10 baseline, not a catalog of every option.
+
+## Author
+
+Created and maintained by [Antonio Arias (@josearias210)](https://github.com/josearias210).
+If this skill is useful to you, a star on the repository helps others find it.
 
 ## License
 

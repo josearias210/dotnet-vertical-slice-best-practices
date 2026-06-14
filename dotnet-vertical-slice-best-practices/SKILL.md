@@ -3,7 +3,7 @@ name: dotnet-vertical-slice-best-practices
 description: Guide for implementing and evolving .NET 10 / C# 14 backends using vertical slices, a source-generated mediator and pipeline, fluent validation, PostgreSQL persistence, EF Core 10 migrations, host/API composition, and GitHub Actions CI. Use when creating or changing backend features, endpoints, handlers, contracts, persistence, migrations, startup composition, or .NET 10 backend behavior. Follow only the steps relevant to the current change.
 compatibility: Designed for Agent Skills-compatible coding assistants, including OpenAI Codex, GitHub Copilot-compatible environments, and Claude Code-style clients.
 metadata:
-  version: "1.8.0"
+  version: "2.0.0"
 ---
 
 # .NET 10 Backend Vertical Slice
@@ -40,6 +40,8 @@ testing is requested.
    |--------------------------------------------------------------------------------|----------------------------------|
    | Minimal APIs, route groups, HTTP result mapping, or OpenAPI                    | dotnet-minimal-api.md            |
    | Commands, queries, handlers, or mediator-dispatched slices                      | dotnet-cqrs-slice.md             |
+   | Slice structure, file responsibilities, or deciding when to split a slice        | dotnet-vertical-slice.md         |
+   | Request/business validation, error modeling, or HTTP failure mapping             | dotnet-validation-and-errors.md  |
    | A complete worked slice / end-to-end example on this stack                       | dotnet-slice-example.md          |
    | Authentication, authorization, ownership, current-user identity, or secrets      | dotnet-security.md               |
    | Startup composition, project boundaries, or solution-wide build/package defaults | dotnet-solution-topology.md      |
@@ -48,8 +50,8 @@ testing is requested.
    | .NET 10 baseline, current C# 14 idioms, or dependency licensing                 | dotnet-platform-baseline.md |
    | Unit or integration tests for a slice, `WebApplicationFactory`, or Testcontainers | dotnet-testing.md |
 
-6. For .NET 10 AppHost work, check whether the change should include SDK pinning, real health
-   checks, OpenAPI build artifacts, fluent request validation, or centralized `ProblemDetails`
+6. For .NET 10 host-composition work, check whether the change should include SDK pinning, real
+   health checks, OpenAPI build artifacts, fluent request validation, or centralized `ProblemDetails`
    metadata.
 7. Run the most relevant verification for the touched backend surface.
 
