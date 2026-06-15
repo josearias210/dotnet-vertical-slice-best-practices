@@ -1,9 +1,9 @@
 ---
 name: dotnet-vertical-slice-best-practices
-description: Guide for implementing and evolving .NET 10 / C# 14 backends using vertical slices, a source-generated mediator and pipeline, fluent validation, PostgreSQL persistence, EF Core 10 migrations, host/API composition, and GitHub Actions CI. Use when creating or changing backend features, endpoints, handlers, contracts, persistence, migrations, startup composition, or .NET 10 backend behavior. Follow only the steps relevant to the current change.
+description: Guide for implementing and evolving .NET 10 / C# 14 backends using vertical slices, a source-generated mediator and pipeline, fluent validation, PostgreSQL persistence, EF Core 10 migrations, mandatory Serilog logging with OpenTelemetry export, host/API composition, and GitHub Actions CI. Use when creating or changing backend features, endpoints, handlers, contracts, persistence, migrations, logging, startup composition, or .NET 10 backend behavior. Follow only the steps relevant to the current change.
 compatibility: Designed for Agent Skills-compatible coding assistants, including OpenAI Codex, GitHub Copilot-compatible environments, and Claude Code-style clients.
 metadata:
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # .NET 10 Backend Vertical Slice
@@ -44,6 +44,7 @@ testing is requested.
    | Request/business validation, error modeling, or HTTP failure mapping             | dotnet-validation-and-errors.md  |
    | A complete worked slice / end-to-end example on this stack                       | dotnet-slice-example.md          |
    | Authentication, authorization, ownership, current-user identity, or secrets      | dotnet-security.md               |
+   | Logging, tracing, metrics, Serilog, or OpenTelemetry export                       | dotnet-observability.md          |
    | Startup composition, project boundaries, or solution-wide build/package defaults | dotnet-solution-topology.md      |
    | Dedicated migrator or containerized local backend startup                        | dotnet-migrations-project.md; create or update `compose.yml` so `docker compose up` runs dependencies and migrations in order |
    | GitHub Actions build workflows, release images, or backend/migrator artifact versioning | devops-github.md |
@@ -90,6 +91,8 @@ Load only the references that apply:
   A complete end-to-end worked slice (entity, command, validator, handler, behavior, EF config, endpoint, migration) on this skill's stack.
 - [dotnet-security.md](references/dotnet-security.md)
   Covers authentication, authorization, ownership checks, the `ICurrentUser` pattern, secrets, and transport hardening.
+- [dotnet-observability.md](references/dotnet-observability.md)
+  Covers mandatory Serilog logging (console by default, OpenTelemetry collector via Serilog's OTLP sink), plus OpenTelemetry tracing and metrics.
 - [dotnet-vertical-slice.md](references/dotnet-vertical-slice.md)
   Explains slice structure, file responsibilities, contract boundaries, and version-discipline expectations.
 - [dotnet-validation-and-errors.md](references/dotnet-validation-and-errors.md)

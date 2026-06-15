@@ -48,8 +48,10 @@ When building or reviewing a .NET 10 backend, confirm these baseline practices:
 - centralize `ProblemDetails` metadata such as trace and correlation identifiers;
 - use fluent request validators instead of `DataAnnotations`;
 - verify Minimal API request validation behavior with an invalid HTTP request;
-- add OpenTelemetry tracing, metrics, and logs, and prefer source-generated logging
-  (`[LoggerMessage]`) over interpolated log calls on hot paths;
+- use **Serilog as the mandatory logging provider** — console by default, and logs exported to the
+  OpenTelemetry collector *through Serilog's OTLP sink* when OpenTelemetry is enabled; wire tracing and
+  metrics via the OpenTelemetry SDK. Prefer `[LoggerMessage]` source-generated logging on hot paths
+  (it still flows through Serilog). See `dotnet-observability.md`;
 - enable built-in rate limiting (`AddRateLimiter`) on public endpoints when load shaping matters;
 - model optimistic concurrency for mutating commands (with Npgsql, the `xmin` system column maps
   cleanly to an EF Core concurrency token);
@@ -85,6 +87,9 @@ above goes stale. Update this file (and the `Last reviewed` date) when any of th
 - EF Core releases and lifecycle: <https://learn.microsoft.com/ef/core/what-is-new/>
 - ASP.NET Core OpenAPI: <https://learn.microsoft.com/aspnet/core/fundamentals/openapi/>
 - HTTP resilience (`Microsoft.Extensions.Http.Resilience`): <https://learn.microsoft.com/dotnet/core/resilience/http-resilience>
+- Serilog: <https://serilog.net/>
+- Serilog OpenTelemetry sink: <https://github.com/serilog/serilog-sinks-opentelemetry>
+- OpenTelemetry for .NET: <https://opentelemetry.io/docs/languages/dotnet/>
 - Npgsql EF Core provider: <https://www.npgsql.org/efcore/>
 - Source-generated mediator (`Mediator`): <https://github.com/martinothamar/Mediator>
 - `ErrorOr`: <https://github.com/amantinband/error-or>

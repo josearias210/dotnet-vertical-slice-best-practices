@@ -22,6 +22,8 @@ deliberately avoided.
 | Validation | Fluent validators in a pipeline behavior |
 | Errors | `ErrorOr<T>` → `ProblemDetails`, with typed `Results<>` unions |
 | Persistence | EF Core 10 + PostgreSQL (Npgsql), dedicated migrations project |
+| Logging | Serilog (mandatory) — console by default, OpenTelemetry collector via Serilog's OTLP sink |
+| Tracing / metrics | OpenTelemetry SDK |
 | API docs | `Microsoft.AspNetCore.OpenApi` + Scalar UI (no Swashbuckle) |
 | Composition | Separate host and transport (`Api`) projects, central package management |
 | Resilience | `Microsoft.Extensions.Http.Resilience` (Polly v8) for outbound HTTP |
@@ -53,9 +55,10 @@ Once installed, your coding assistant will:
 - Keep deployable GitHub Actions image builds on merges to `main`, emitting matched backend and migrator image versions
 - Preserve stable API contracts and avoid breaking caller behavior
 - Check authorization, ownership, and persistence impact on every backend change
+- Standardize logging on Serilog (mandatory): console by default, with logs exported to the OpenTelemetry collector through Serilog's OTLP sink when OpenTelemetry is enabled
 - Pin everything to the .NET 10 / C# 14 baseline and apply current idioms (file-scoped namespaces, primary constructors, no underscore-prefixed fields)
 
-The skill ships eleven internal reference files that the agent loads on demand, grouped by concern:
+The skill ships twelve internal reference files that the agent loads on demand, grouped by concern:
 
 **Feature slices & API edge**
 
@@ -66,6 +69,7 @@ The skill ships eleven internal reference files that the agent loads on demand, 
 | `dotnet-minimal-api.md` | Minimal API endpoints, route groups, typed result mapping, `ProblemDetails`, OpenAPI + Scalar |
 | `dotnet-validation-and-errors.md` | Request validation, business errors, `ErrorOr` → `ProblemDetails` mapping |
 | `dotnet-security.md` | Authentication, authorization, ownership, the `ICurrentUser` pattern, secrets, transport hardening |
+| `dotnet-observability.md` | Mandatory Serilog logging (console + OpenTelemetry via Serilog's OTLP sink), OpenTelemetry tracing and metrics |
 | `dotnet-slice-example.md` | Complete end-to-end worked slice: entity, command, validator, handler, behavior, EF config, endpoint, migration |
 
 **Persistence**

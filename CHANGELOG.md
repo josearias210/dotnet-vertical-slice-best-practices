@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 The version recorded here matches `metadata.version` in
 [`SKILL.md`](dotnet-vertical-slice-best-practices/SKILL.md).
 
+## [2.1.0] - 2026-06-14
+
+### Added
+- `dotnet-observability.md`: **Serilog is now the mandatory logging provider.** Console output is the
+  default sink and always on. When OpenTelemetry is enabled, logs are exported to the collector
+  *through Serilog's OTLP sink* (`Serilog.Sinks.OpenTelemetry`) — a single log pipeline, not the
+  OpenTelemetry logging provider. Tracing and metrics go through the OpenTelemetry SDK; only logs flow
+  via Serilog. Includes host configuration, trace/log correlation (`service.name`, `TraceId`/`SpanId`),
+  and conventions (bootstrap logger, request logging, structured properties).
+- Serilog and OpenTelemetry sources added to the platform-baseline source list.
+
+### Changed
+- The platform-baseline observability check now mandates Serilog and the Serilog OTLP export path.
+- README opinionated-stack table gained Logging and Tracing/metrics rows; reference count is now twelve.
+
 ## [2.0.0] - 2026-06-14
 
 First public release of the matured, opinionated **.NET 10 / C# 14** baseline. This is a major bump
